@@ -1,0 +1,215 @@
+{
+  "name": "Gmail to Telegram summary",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        -192
+      ],
+      "id": "09e294bf-6743-4798-845e-fb4c98d4d471",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "filters": {
+          "labelIds": [
+            "INBOX",
+            "UNREAD"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        -192
+      ],
+      "id": "f50c913f-ef84-4a86-931a-d89bda9e73cd",
+      "name": "Get many messages",
+      "webhookId": "cecb8efd-b9d7-4bf2-9d14-d9ea20e10827",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fU84BvkZRxvjPxbJ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6b851c85-18bc-43da-aa9b-0ab247810aff",
+              "leftValue": "={{ Number($json.internalDate) }}\n",
+              "rightValue": "={{ Date.now() - (11 * 60 * 1000) }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        -192
+      ],
+      "id": "88bfb71e-70f3-4752-a15c-cb0552be6cc4",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4d2446e6-b69c-4c93-9ba0-fc28b0ae1773",
+              "name": "message",
+              "value": "=Новое письмо!\n\nОт: {{ $json.From || \"Без отправителя\" }}\nТема: {{ $json.Subject || \"Без темы\" }}\n\nПревью: {{ $json.snippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        -192
+      ],
+      "id": "8a3a3e25-1d48-4d24-856b-733fc11ef668",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "chatId": "608640790",
+        "text": "={{ $json.message }}",
+        "replyMarkup": "=inlineKeyboard",
+        "forceReply": {},
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "✅Прочитано",
+                    "additionalFields": {
+                      "callback_data": "read"
+                    }
+                  },
+                  {
+                    "text": " 🗑Удалить",
+                    "additionalFields": {
+                      "callback_data": "delete"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "replyKeyboardOptions": {},
+        "replyKeyboardRemove": {},
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        656,
+        -192
+      ],
+      "id": "e496445f-e19f-4977-9dab-6008820dbe3e",
+      "name": "Send a text message",
+      "webhookId": "bdf76896-4e95-4e8a-8e10-b02d957cfad9",
+      "credentials": {
+        "telegramApi": {
+          "id": "bPwBhdg1yfibs48k",
+          "name": "gmail assist"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "eb21d665-bafc-4462-a14c-bc508409af0a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a10c78c118264e8de70dee27e1e8b43ae0eacb81bdfb475878d8c2b2028598e9"
+  },
+  "id": "rsriNLbaTOg2La2w",
+  "tags": []
+}
