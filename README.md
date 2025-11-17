@@ -30,15 +30,4 @@ Automated workflow that monitors Gmail and sends notifications to Telegram every
 - [n8n Documentation](https://docs.n8n.io)
 - [Telegram Bot API](https://core.telegram.org/bots/api)
 
-## 📝 License
 
-MIT
-```
-
----
-
-## Шаг 5: Добавь ссылку в Notion
-
-В твоей карточке проекта добавь:
-```
-🔗 GitHub: https://github.com/твой-username/gmail-telegram-assistant
